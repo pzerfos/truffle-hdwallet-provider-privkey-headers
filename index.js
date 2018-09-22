@@ -3,7 +3,7 @@ const HookedSubprovider = require('web3-provider-engine/subproviders/hooked-wall
 const Web3 = require('web3')
 const Transaction = require('ethereumjs-tx')
 const ProviderEngine = require('web3-provider-engine')
-const Web3Subprovider = require('web3-provider-engine/subproviders/web3.js')
+const Web3Subprovider = require('web3-provider-engine/subproviders/provider.js')    // pzerfos: renamed in v14.0.6
 const ethereumjsWallet = require('ethereumjs-wallet')
 
 function HDWalletProvider (privateKey, providerUrl, headers) {
@@ -50,6 +50,15 @@ function HDWalletProvider (privateKey, providerUrl, headers) {
   this.engine.addProvider(
     new Web3Subprovider(new Web3.providers.HttpProvider(providerUrl, 0, null, null, headers))
   )
+  // pzerfos@cs.ucla.edu : add some error handling (it does not seem to be working right now)
+  // network connectivity error
+  this.engine.on('error', function(err){
+    // report connectivity errors
+    console.error('pzerfos: from truffle-hdwallet error')
+    console.error(err.stack)
+    this.engine.stop()
+  })
+
   this.engine.start() // Required by the provider engine.
 }
 
